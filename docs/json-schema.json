@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "route-selection-explainer schema 1.0",
+  "type": "object",
+  "required": ["schema_version", "application_version", "status", "destination", "family", "selected_route", "interface", "source_address", "competing_routes", "table_evidence_complete", "factors", "warnings", "limitations", "error"],
+  "properties": {
+    "table_evidence_complete": {"type": "boolean"},
+    "schema_version": {"const": "1.0"},
+    "application_version": {"const": "1.0.0"},
+    "status": {"enum": ["ok", "no_route", "inspection_error", "usage_error", "invalid_destination", "internal_error"]},
+    "destination": {"type": ["string", "null"]},
+    "family": {"enum": ["IPv4", "IPv6", null]},
+    "selected_route": {"anyOf": [{"$ref": "#/$defs/route"}, {"type": "null"}]},
+    "interface": {"anyOf": [{"$ref": "#/$defs/interface"}, {"type": "null"}]},
+    "source_address": {"type": ["string", "null"]},
+    "competing_routes": {"type": "array", "items": {"type": "object", "required": ["route", "matches_selected", "factor"], "properties": {"route": {"$ref": "#/$defs/route"}, "matches_selected": {"type": "boolean"}, "factor": {"type": "string"}}}},
+    "factors": {"$ref": "#/$defs/strings"},
+    "warnings": {"$ref": "#/$defs/strings"},
+    "limitations": {"$ref": "#/$defs/strings"},
+    "error": {"type": ["object", "null"], "required": ["code", "message"], "properties": {"code": {"type": "integer", "minimum": 0}, "message": {"type": "string"}}}
+  },
+  "$defs": {
+    "strings": {"type": "array", "items": {"type": "string"}},
+    "metric": {"type": ["integer", "null"], "minimum": 0},
+    "luid": {"type": "string", "pattern": "^[0-9]+$"},
+    "route": {
+      "type": "object",
+      "required": ["prefix", "prefix_length", "interface_luid", "interface_index", "next_hop", "on_link", "route_metric", "interface_metric", "effective_metric", "protocol", "origin", "loopback"],
+      "properties": {
+        "prefix": {"type": "string"}, "prefix_length": {"type": "integer", "minimum": 0, "maximum": 128},
+        "interface_luid": {"$ref": "#/$defs/luid"}, "interface_index": {"type": "integer", "minimum": 0},
+        "next_hop": {"type": "string"}, "on_link": {"type": "boolean"},
+        "route_metric": {"type": "integer", "minimum": 0}, "interface_metric": {"$ref": "#/$defs/metric"}, "effective_metric": {"$ref": "#/$defs/metric"},
+        "protocol": {"type": "integer", "minimum": 0}, "origin": {"type": "integer", "minimum": 0}, "loopback": {"type": "boolean"}
+      }
+    },
+    "interface": {
+      "type": "object",
+      "required": ["luid", "index", "alias", "description", "kind", "oper_status", "if_type", "tunnel_type", "hardware_interface", "metric"],
+      "properties": {
+        "luid": {"$ref": "#/$defs/luid"}, "index": {"type": "integer", "minimum": 0},
+        "alias": {"type": "string"}, "description": {"type": "string"}, "kind": {"type": "string"},
+        "oper_status": {"type": "integer"}, "if_type": {"type": "integer"}, "tunnel_type": {"type": "integer"},
+        "hardware_interface": {"type": ["boolean", "null"]}, "metric": {"$ref": "#/$defs/metric"}
+      }
+    }
+  }
+}
